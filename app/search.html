@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search for Books in the Library</title>
+    <link rel="stylesheet" href="styles-search.css">
+</head>
+
+<body>
+    <h1>Search for Books in the Library</h1>
+    <!-- Sökformulär  Författare-->
+    <div class="search-active">
+        <br>
+        <input id="keyword" type="text" />
+        <br>
+        <button id="search">Search Author or Book Title</button>
+    </div>
+
+    <!-- Sökformulär Titel-->
+    <!-- <div class="search-active-title">
+        <br>
+        <input id="keywordtitle" type="text" />
+        <br>
+        <button id="search-title">Search Title</button>
+    </div> -->
+
+    <!-- Sökresultat -->
+    <ul id="searchResults"> Search results: <br>
+        Author Name,  Book Title,  Year Publ.,  Genre,  Available / Total Books:
+        <br>
+    </ul>
+
+    <!-- Redigeringsformulär -->
+    <br>
+    <div class="update-inactive">
+
+        <input id="bookId" type="hidden" name="bookId" />
+
+        <label for="author_name">Author Full Name:</label><br>
+        <input id="author_name" type="text" name="author_name" autofocus /><br>
+
+        <label for="book_title">Book Title:</label><br>
+        <input id="book_title" type="text" name="book_title" /><br>
+
+        <label for="year_published">Year Published:</label><br>
+        <input id="year_published" type="text" name="year_published" />
+        <br>
+        <label for="genre">Genre:</label><br>
+        <input id="genre" type="text" name="genre" />
+        <br>
+        <label for="availability">Availability:</label><br>
+        <input id="availability" type="text" name="availability" />
+        <br>
+
+        <!-- UPDATE -->
+        <br>
+        <button id="btnUpdate" type="submit">Save Updates</button>
+
+        <br><br>
+
+        <!-- DELETE -->
+        <button id="btnDelete" class="button-delete" type="submit">Delete Book</button>
+    </div>
+
+    <script>
+        const btnSearch = document.querySelector('#search');
+        const btnUpdate = document.querySelector('#btnUpdate');
+        const btnDelete = document.querySelector('#btnDelete');
+//EVENT LISTENER
+        btnSearch.addEventListener('click', () => {
+//WRITE RESULTS
+            printResults();
+        });
+
+        // Update Book with click function
+        btnUpdate.addEventListener('click', () => {
+
+            let bookId = document.querySelector('#bookId');
+            let author_name = document.querySelector('#author_name');
+            let book_title = document.querySelector('#book_title');
+            let year_published = document.querySelector('#year_published');
+            let genre = document.querySelector('#genre');
+            let availability = document.querySelector('#availability');
+
+            const options = {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ bookId: bookId.value, author_name: author_name.value, book_title: book_title.value, year_published: year_published.value, genre: genre.value, availability: availability.value })
+            }
+
+            fetch('http://localhost:3001/customer/edit', options)
+                .then(response => console.log(response))
+                .catch(error => console.error(error));
+        })
+
+        // Delete Book with click function
+        btnDelete.addEventListener('click', () => {
+
+            let bookId = document.querySelector('#bookId');
+
+            const options = {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ bookId: bookId.value })
+            }
+
+            fetch('http://localhost:3001/customer/remove', options)
+                .then(response => console.log(response))
+                .catch(error => console.error(error));
+        })
+
+        // Sök resultat Författare
+        async function printResults() {
+
+            const ul = document.querySelector('#searchResults');
+            let data = await getResultsByKeyword();
+
+            for (const customer of data) {
+
+                let li = document.createElement('li');
+                let a = document.createElement('a');
+                let t = document.createElement('t');
+                let y = document.createElement('y');
+                let g = document.createElement('g');
+                let av = document.createElement('av');
+
+                a.id = customer.bookId;
+                a.innerText = customer.author_name;
+                t.innerText = customer.book_title;
+                y.innerText = customer.year_published;
+                g.innerText = customer.genre;
+                av.innerText = customer.availability;
+
+                a.addEventListener('click', () => {
+
+                    ul.innerHTML = '';
+
+                    // Fyll i redigeringsformuläret
+                    setCurrentCustomer(customer.bookId, customer.author_name, customer.book_title, customer.year_published, customer.genre, customer.availability);
+
+                    // Visar redigeringsformuläret
+                    displayUpdate();
+                })
+
+                li.appendChild(a);
+                li.appendChild(t);
+                li.appendChild(y);
+                li.appendChild(g);
+                li.appendChild(av);
+                ul.appendChild(li);
+            }
+        }
+// FILL UPDATE FORM
+         function setCurrentCustomer(bookId, author_name, book_title, year_published, genre, availability) {
+             document.querySelector('#bookId').value = bookId;
+             document.querySelector('#author_name').value = author_name;
+             document.querySelector('#book_title').value = book_title;
+             document.querySelector('#year_published').value = year_published;
+             document.querySelector('#genre').value = genre;
+             document.querySelector('#availability').value = availability;
+         }
+
+        function displayUpdate() {
+
+            // Döljer sökformuläret
+            var search = document.querySelector('.search-active');
+            search.className = 'search-inactive';
+
+            // Visar redigeringsformuläret
+            var update = document.querySelector('.update-inactive');
+            update.className = 'update-active';
+        }
+
+        // GET DATA FROM NAME OR AUTHOR
+        async function getResultsByKeyword() {
+
+            let keyword = document.querySelector('#keyword').value;
+
+            const options = {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }
+
+            let response = await fetch('http://localhost:3001/customer/search?' + new URLSearchParams({
+                keyword: keyword
+            }), options)
+                .catch(error => {
+                    console.error(error);
+                });
+
+            let data = await response.json();
+
+            console.log(data)
+
+            return data;
+        };
+
+    </script>
+</body>
+
+</html>

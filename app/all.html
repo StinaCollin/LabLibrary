@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List all</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<h1>List of All Books in the Library</h1>
+<!-- <div class="list-all">
+    <br>
+    <button id="list-all">List All Books</button>
+</div> -->
+    <!-- Hela bok listan -->
+    <!-- <ul id="allbooks">
+    </ul> -->
+    <script>
+        const options = {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        };
+
+        printCustomerData();
+
+        async function printCustomerData() {
+
+            let data = await getAllCustomers();
+
+            let body = document.querySelector('body');
+
+            for (const customer of data) {
+
+                let element = document.createElement('p');
+
+                element.innerText = customer.author_name;
+
+                body.appendChild(element);
+
+                console.log(customer);
+            }
+        }
+
+        async function getAllCustomers() {
+            const options = {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }}
+
+            const response = await fetch('http://localhost:3001/customer/all', options)
+            .catch(error => {
+                console.error(error);
+            });
+
+            let data = await response.json();
+
+            return data;
+        }
+
+    </script>
+</body>
+</html>

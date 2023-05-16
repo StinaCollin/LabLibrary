@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register a new Book</title>
+    <link rel="stylesheet" href="/styles-index.css">
+</head>
+<body>
+    <h1>Register a new Book</h1>
+
+    <!-- Registreringsformulär -->
+    <label for="author_name">Author Full Name:</label>
+    <input id="author_name" type="text" name="author_name" autofocus />
+    <br>
+    <label for="book_title">Title of the Book: </label>
+    <input id="book_title" type="text" name="book_title" />
+    <br>
+    <label for="year_published">Year Published:</label>
+    <input id="year_published" type="text" name="year_published" />
+    <br>
+    <label for="genre">Genre:</label>
+    <input id="genre" type="text" name="genre" />
+    <br>
+    <label for="availability">Availability:</label>
+    <input id="availability" type="text" name="availability" />
+    <br>
+    <br>
+
+    <button id="btnSave" type="submit">Save New Book</button>
+
+    <script>
+        var btnSave = document.querySelector('#btnSave');
+        var author_name = document.querySelector('#author_name');
+        var book_title = document.querySelector('#book_title');
+        var year_published = document.querySelector('#year_published');
+        var genre = document.querySelector('#genre');
+        var availability = document.querySelector('#availability');
+
+        btnSave.addEventListener('click', () => {
+
+            const options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ author_name: author_name.value, book_title: book_title.value,  year_published: year_published.value, genre: genre.value, availability: availability.value })
+            }
+
+            fetch('http://localhost:3001/customer/add', options)
+            .then(response => console.log(response))
+            .catch(error => console.error(error));
+        });
+    </script>
+</body>
+</html>
